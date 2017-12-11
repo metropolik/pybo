@@ -29,7 +29,6 @@ World/Corpse.cpp
 World/DynamicObject.cpp
 World/GameObject.cpp
 World/Item.cpp
-#World/MapMgr.cpp
 World/MovementMgr.cpp
 World/Object.cpp
 World/ObjMgr.cpp
@@ -43,7 +42,6 @@ World/WorldPacket.cpp
 World/WorldSession.cpp
 World/WorldSocket.cpp
 
-#Cli.cpp
 main.cpp
 PseuWoW.cpp
 SCPDatabase.cpp

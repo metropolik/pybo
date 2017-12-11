@@ -76,22 +76,6 @@ class PseuInstanceConf
     uint8 dumpPackets;
     bool softquit;
     uint8 dataLoaderThreads;
-    bool useMPQ;
-
-    // gui related
-    bool enablegui;
-    uint32 terrainsectors;
-    uint32 terrainrendersize;
-    uint32 terrainupdatestep;
-    float farclip;
-    float fogfar;
-    float fognear;
-    float fov;
-
-    // sound related
-    float masterSoundVolume;
-
-
 };
 
 

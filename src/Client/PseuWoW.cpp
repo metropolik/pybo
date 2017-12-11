@@ -137,9 +137,8 @@ void PseuInstance::Run(void)
         SetError();
     }
     else
-    {
-        //pybot--acc und accpass einstellen
-        if(!GetConf()->enablegui || !(GetConf()->accname.empty() || GetConf()->accpass.empty()) )
+    {        
+        if(!(GetConf()->accname.empty() || GetConf()->accpass.empty()) )
         {
             logdebug("GUI not active or Login data pre-entered, skipping Login GUI");
             CreateRealmSession();
@@ -308,11 +307,8 @@ bool PseuInstance::ConnectToRealm(void)
 
 PseuInstanceConf::PseuInstanceConf()
 {
-    enablecli=false;
-    enablegui=false;
     exitonerror=false;
     debug=0;
-    rmcontrolport=0;
 }
 
 void PseuInstanceConf::ApplyFromVarSet(void)
@@ -321,7 +317,7 @@ void PseuInstanceConf::ApplyFromVarSet(void)
     realmlist="localhost";
     accname="myacc";
     accpass="mypass2";
-    exitonerror=false;
+    exitonerror=true;
     reconnect=10000;
     realmport=3724;
     client=CLIENT_WOTLK;
@@ -337,7 +333,6 @@ void PseuInstanceConf::ApplyFromVarSet(void)
     notifyping=true;
     showmyopcodes=true;
     disablespellcheck=false;
-    enablegui=false;
     rmcontrolport=0;
     rmcontrolhost="";
     rmcontrolpass="";
@@ -346,29 +341,15 @@ void PseuInstanceConf::ApplyFromVarSet(void)
     dumpPackets=1;
     softquit=true;
     dataLoaderThreads=2;
-    useMPQ=false;
 
     switch(client)
     {
-      case CLIENT_CLASSIC_WOW:
-      {
-        clientbuild = 6005;
-        clientversion_string="1.12.2";
-        break;
-      }
-      case CLIENT_TBC:
-      {
-        clientbuild = 8606;
-        clientversion_string="2.4.3";
-        break;
-      }
       case CLIENT_WOTLK:
       {
         clientbuild = 12340;
         clientversion_string="3.3.5";
         break;
       }
-      case CLIENT_CATA:
       default:
       {
         logerror("Unknown client - check conf");

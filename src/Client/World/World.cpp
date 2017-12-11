@@ -7,8 +7,7 @@
 World::World(WorldSession *s)
 {
     _session = s;
-    _mapId = -1;
-    _mapmgr = NULL;
+    _mapId = -1;    
     _movemgr = NULL;
     // if(_session->GetInstance()->GetConf()->useMaps)
     // {
@@ -20,8 +19,6 @@ World::World(WorldSession *s)
 World::~World()
 {
     Clear();
-    if(_mapmgr)
-        delete _mapmgr;
 }
 
 // called on SMSG_NEW_WORLD
