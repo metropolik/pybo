@@ -17,6 +17,7 @@
 #include "Realm/RealmSession.h"
 #include "Realm/RealmSocket.h"
 #include <unistd.h>
+#include <fstream>
 
 
 struct OpcodeHandler

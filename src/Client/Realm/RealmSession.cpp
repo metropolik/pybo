@@ -709,20 +709,20 @@ void RealmSession::_HandleTransferData(ByteBuffer& pkt)
         logdebug("MD5 hash: %s", md5hex.c_str());
         if(!memcmp(_file_md5, md5h.GetDigest(), md5h.GetLength()))
         {
-            std::fstream fh;
-            char namebuf[100];
-            sprintf(namebuf,"%u%s.mpq",GetInstance()->GetConf()->clientbuild,GetInstance()->GetConf()->clientlang.c_str());
-            fh.open(namebuf,std::ios_base::out | std::ios_base::binary);
-            if(fh.is_open())
-            {
-                fh.write((const char*)_filebuf.contents(),_filebuf.size());
-                fh.close();
-                log("File saved as \"%s\"",namebuf);
-            }
-            else
-            {
-                logerror("Could not save \"%s\"",namebuf);
-            }
+//            std::fstream fh;
+//            char namebuf[100];
+//            sprintf(namebuf,"%u%s.mpq",GetInstance()->GetConf()->clientbuild,GetInstance()->GetConf()->clientlang.c_str());
+//            fh.open(namebuf,std::ios_base::out | std::ios_base::binary);
+//            if(fh.is_open())
+//            {
+//                fh.write((const char*)_filebuf.contents(),_filebuf.size());
+//                fh.close();
+//                log("File saved as \"%s\"",namebuf);
+//            }
+//            else
+//            {
+                logerror("Could not save File weil ichs im src ausgemacht hab RealmSession.cpp");
+//            }
         }
         else
         {

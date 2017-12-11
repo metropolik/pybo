@@ -14,7 +14,6 @@ if(UNIX)
   set(PSEUWOW_LIBS ${PSEUWOW_LIBS} GL Xxf86vm bz2)
 endif()
 
-add_subdirectory (DefScript)
 
 
 
@@ -45,11 +44,8 @@ World/WorldSession.cpp
 World/WorldSocket.cpp
 
 #Cli.cpp
-ControlSocket.cpp
-#DefScriptInterface.cpp
 main.cpp
 PseuWoW.cpp
-RemoteController.cpp
 SCPDatabase.cpp
 )
 

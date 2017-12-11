@@ -7,11 +7,9 @@
 //#include "DefScript/DefScript.h"
 //#include "DefScriptInterface.h"
 #include "Auth/BigNumber.h"
-#include "DefScript/DefScript.h"
 #include "Realm/RealmSession.h"
 #include "World/WorldSession.h"
 #include "World/CacheHandler.h"
-#include "RemoteController.h"
 //#include "Cli.h"
 #include <stdio.h>
 #include <unistd.h>
@@ -43,7 +41,6 @@ PseuInstance::PseuInstance(PseuInstanceRunnable *run)
     _ver_short="A13.51" DEBUG_APPENDIX;
     _wsession=NULL;
     _rsession=NULL;
-    _scp=NULL;
     _conf=NULL;
     _stop=false;
     _fastquit=false;

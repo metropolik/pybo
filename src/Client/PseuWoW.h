@@ -5,7 +5,6 @@
 #include "common.h"
 #include "HelperDefs.h"
 #include "Auth/BigNumber.h"
-#include "DefScript/DefScript.h"
 #include "Network/SocketHandler.h"
 #include "SCPDatabase.h"
 #include <queue>
@@ -14,7 +13,6 @@ class RealmSession;
 class WorldSession;
 class Sockethandler;
 class PseuInstanceRunnable;
-class CliRunnable;
 
 // possible conditions threads can wait for. used for thread synchronisation. extend if needed.
 enum InstanceConditions
@@ -108,7 +106,6 @@ public:
     inline WorldSession *GetWSession(void) { return _wsession; }
     inline RealmSession *GetRSession(void) { return _rsession; }
     inline PseuInstanceConf *GetConf(void) { return _conf; }
-    inline DefScriptPackage *GetScripts(void) { return _scp; }
 
     void DeleteGUI(void);
     bool ConnectToRealm(void);
@@ -144,7 +141,6 @@ private:
     RealmSession *_rsession;
     WorldSession *_wsession;
     PseuInstanceConf *_conf;
-    DefScriptPackage *_scp;
     std::string _confdir,_scpdir; // _scpdir is the scripts dir, and NOT where SCP files are stored!!
     bool _initialized;
     bool _stop,_fastquit;
