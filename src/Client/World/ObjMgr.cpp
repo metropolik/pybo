@@ -47,7 +47,7 @@ void ObjMgr::Remove(uint64 guid, bool del)
     {
         o->_SetDepleted();
         if(!del)
-            logdebug("ObjMgr: PYBOT WTF '%s' -> depleted.",guid,o->GetName().c_str());
+            logdebug("ObjMgr: "I64FMT" '%s' -> depleted.",guid,o->GetName().c_str());
 
         if(del)
         {
@@ -59,7 +59,7 @@ void ObjMgr::Remove(uint64 guid, bool del)
     {
         _obj.erase(guid); // we can safely erase an object that does not exist
                           // - if we reach this point there was a bug anyway
-        logcustom(2,LRED,"ObjMgr::Remove(PYBOT WTF) - not existing",guid);
+        logcustom(2,LRED,"ObjMgr::Remove(" I64FMT ") - not existing",guid);
     }
 }
 

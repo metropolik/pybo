@@ -491,7 +491,7 @@ std::string WorldSession::GetOrRequestPlayerName(uint64 guid)
 {
     if(!guid || GUID_HIPART(guid) != HIGHGUID_PLAYER)
     {
-        logerror("WorldSession::GetOrRequestObjectName: PYBOT WTF is not player",guid);
+        logerror("WorldSession::GetOrRequestObjectName: "I64FMT" is not player",guid);
         return "<ERR: OBJECT>"; // TODO: temporary, to find bugs with this, if there are any
     }
     std::string name = plrNameCache.GetName(guid);
@@ -632,13 +632,14 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             recvPacket >> plr[i]._flags;
             if(GetInstance()->GetConf()->client > CLIENT_TBC)
             {
-              recvPacket >> dummy32; // at_login_customize
+              recvPacket >> dummy32; // CHAR_CUSTOMIZE_FLAG_CUSTOMIZE,...
             }
-            recvPacket >> dummy8;
-            recvPacket >> plr[i]._petInfoId;
+            recvPacket >> dummy8; //atLoginFlags //FirstLogin //pet_entry
+            recvPacket >> plr[i]._petInfoId; //pet display id
             recvPacket >> plr[i]._petLevel;
             recvPacket >> plr[i]._petFamilyId;
-            for(unsigned int inv=0;inv<20;inv++)
+            size_t sizeWithInventory = recvPacket.size();
+            for(unsigned int inv=0;inv<23;inv++)
             {
                 recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype ;
                 if(GetInstance()->GetConf()->client > CLIENT_CLASSIC_WOW)
@@ -646,6 +647,8 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
                   recvPacket >> dummy32; //enchant aura id
                 }
             }
+            size_t sizeWithoutInventory = recvPacket.size();
+            logdetail("sizeWith: %zu, sizeWithou: %zu, diff: ", sizeWithInventory, sizeWithoutInventory, sizeWithInventory - sizeWithoutInventory);
             plrNameCache.Add(plr[i]._guid, plr[i]._name); // TODO: set after loadingscreen, after loading cache
 
         }
@@ -871,7 +874,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket) //TODO: REW
             {
                 recvPacket >> listener_name_len; // always 1 (\0)
                 recvPacket >> listener_name; // always \0
-                logdebug("CHAT: Listener: '%s' (guid=PYBOT WTF len=%u type=%u)", listener_name.c_str(), listener_guid, listener_name_len, type);
+                logdebug("CHAT: Listener: '%s' (guid="I64FMT" len=%u type=%u)", listener_name.c_str(), listener_guid, listener_name_len, type);
             }
             break;
 
@@ -906,7 +909,7 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket) //TODO: REW
     // GetInstance()->GetScripts()->variables.Set("@thismsg",DefScriptTools::toString(source_guid));
 
 
-    DEBUG(logdebug("Chat packet recieved, type=%u lang=%u src=PYBOT WTF dst=PYBOT WTF chn='%s' len=%u",
+    DEBUG(logdebug("Chat packet recieved, type=%u lang=%u src="I64FMT" dst="I64FMT" chn='%s' len=%u",
         type,lang,source_guid,source_guid,channel.c_str(),msglen));
 
     if (type == CHAT_MSG_SYSTEM)
@@ -1109,7 +1112,7 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     MovementInfo mi;
     guid = recvPacket.readPackGUID();
     recvPacket >> mi;
-    DEBUG(logdebug("MOVE: PYBOT WTF -> time=%u flags=0x%X x=%.4f y=%.4f z=%.4f o=%.4f",guid,mi.time,mi.flags,mi.pos.x,mi.pos.y,mi.pos.z,mi.pos.o));
+    DEBUG(logdebug("MOVE: "I64FMT" -> time=%u flags=0x%X x=%.4f y=%.4f z=%.4f o=%.4f",guid,mi.time,mi.flags,mi.pos.x,mi.pos.y,mi.pos.z,mi.pos.o));
     Object *obj = objmgr.GetObj(guid);
     if(obj && obj->IsWorldObject())
     {
@@ -1251,7 +1254,7 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     guid = recvPacket.readPackGUID();
     recvPacket >> unk32 >> mi;
 
-    logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: PYBOT WTF", mi.pos.x, mi.pos.y, mi.pos.z, mi.pos.o, guid);
+    logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, mi.pos.x, mi.pos.y, mi.pos.z, mi.pos.o, guid);
 
     _world->UpdatePos(mi.pos.x,mi.pos.y);
     _world->Update();
@@ -1289,7 +1292,7 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
 
 void WorldSession::_HandleNewWorldOpcode(WorldPacket& recvPacket)
 {
-    DEBUG(logdebug("DEBUG: _HandleNewWorldOpcode() objs:%u mychar: ptr=0x%X, guid=PYBOT WTF",objmgr.GetObjectCount(),GetMyChar(),GetMyChar()->GetGUID()));
+    DEBUG(logdebug("DEBUG: _HandleNewWorldOpcode() objs:%u mychar: ptr=0x%X, guid="I64FMT,objmgr.GetObjectCount(),GetMyChar(),GetMyChar()->GetGUID()));
     uint32 mapid;
     float x,y,z,o;
     // we assume we are NOT on a transport!
@@ -1374,7 +1377,7 @@ void WorldSession::_HandleCastSuccessOpcode(WorldPacket& recvPacket)
         if(caster)
             logdetail("%s casted spell %u", caster->GetName().c_str(), spellId);
         else
-            logerror("Caster of spell %u (GUID PYBOT WTF) is unknown object!",spellId,casterGuid);
+            logerror("Caster of spell %u (GUID "I64FMT") is unknown object!",spellId,casterGuid);
     }
 }
 

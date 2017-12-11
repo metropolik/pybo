@@ -15,7 +15,7 @@ Object::Object()
 Object::~Object()
 {
     ASSERT(_valuescount > 0);
-    DEBUG(logdebug("~Object() GUID=PYBOTWTF",GetGUID()));
+    DEBUG(logdebug("~Object() GUID="I64FMT,GetGUID()));
     if(_uint32values)
         delete [] _uint32values;
 }
@@ -111,8 +111,7 @@ void WorldSession::_HandleDestroyObjectOpcode(WorldPacket& recvPacket)
     uint8 dummy;
 
     recvPacket >> guid;
-    if(GetInstance()->GetConf()->client > CLIENT_TBC)
-      recvPacket >> dummy;
+    recvPacket >> dummy;
     logdebug("Destroy Object %ld", guid);
 
     // call script just before object removal

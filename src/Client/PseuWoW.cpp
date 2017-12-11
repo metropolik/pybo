@@ -322,15 +322,15 @@ void PseuInstanceConf::ApplyFromVarSet(void)
 {
     debug=3;
     realmlist="localhost";
-    accname="admin";
-    accpass="admin";
+    accname="myacc";
+    accpass="mypass2";
     exitonerror=false;
     reconnect=10000;
     realmport=3724;
     client=CLIENT_WOTLK;
     clientlang="enUS";
     realmname="Trinity";
-    charname="Pseuwow";
+    charname="Elodin";
     networksleeptime=1;
     showopcodes=3;
     hidefreqopcodes=true;

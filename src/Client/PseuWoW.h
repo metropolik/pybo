@@ -15,7 +15,6 @@ class WorldSession;
 class Sockethandler;
 class PseuInstanceRunnable;
 class CliRunnable;
-class RemoteController;
 
 // possible conditions threads can wait for. used for thread synchronisation. extend if needed.
 enum InstanceConditions

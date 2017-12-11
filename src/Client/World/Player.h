@@ -153,7 +153,7 @@ public:
 	uint32 _petInfoId;
 	uint32 _petLevel;
 	uint32 _petFamilyId;
-	PlayerEnumItem _items[20];
+    PlayerEnumItem _items[23];
 
 private:
 

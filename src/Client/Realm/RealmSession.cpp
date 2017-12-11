@@ -643,7 +643,7 @@ void RealmSession::_HandleTransferInit(ByteBuffer& pkt)
     pkt.read(type_str,type_size);
     pkt >> _file_size;
     pkt.read(_file_md5,MD5_DIGEST_LENGTH);
-    logcustom(0,GREEN,"TransferInit [%s]: File size: PYBOT WTF KB (MD5: %s)", (char*)type_str, _file_size / 1024L, toHexDump(&_file_md5[0],MD5_DIGEST_LENGTH,false).c_str());
+    logcustom(0,GREEN,"TransferInit [%s]: (MD5: %s)", toHexDump(&_file_md5[0],MD5_DIGEST_LENGTH,false).c_str());
     delete [] type_str;
     ByteBuffer bb(1);
     bb << uint8(XFER_ACCEPT);
