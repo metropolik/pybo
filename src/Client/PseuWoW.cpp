@@ -15,29 +15,11 @@
 #include <unistd.h>
 
 
-//###### Start of program code #######
-
-
-// void PseuInstanceRunnable::run(void)
-// {
-//     _i->SetConfDir("./conf/");
-//     _i->SetScpDir("./scripts/");
-//     if(_i->Init())
-//     {
-//         _i->Run();
-//     }
-//     else
-//     {
-//         getchar(); // if init failed, wait for keypress before exit
-//     }
-//     delete _i;
-// }
-
 
 PseuInstance::PseuInstance(PseuInstanceRunnable *run)
 {
     _runnable=run;
-    _ver="PseuWoW Alpha Build 13.51" DEBUG_APPENDIX;
+    _ver="Pybo" DEBUG_APPENDIX;
     _ver_short="A13.51" DEBUG_APPENDIX;
     _wsession=NULL;
     _rsession=NULL;
@@ -69,8 +51,7 @@ PseuInstance::~PseuInstance()
 
 bool PseuInstance::Init(void)
 {
-    log_setloglevel(0);
-    log("");
+    log_setloglevel(0);    
     log("--- Initializing Instance ---");
 
     if(_confdir.empty())
@@ -81,11 +62,7 @@ bool PseuInstance::Init(void)
     srand((unsigned)time(NULL));
     RAND_set_rand_method(RAND_SSLeay()); // init openssl randomizer
 
-    // _scp=new DefScriptPackage();
-    // _scp->SetParentMethod((void*)this);
-    _conf=new PseuInstanceConf();
-
-    // _scp->SetPath(_scpdir);
+    _conf=new PseuInstanceConf();    
 
     CreateDir("cache");
 
@@ -93,20 +70,6 @@ bool PseuInstance::Init(void)
     dbmgr.AddSearchPath("./data/scp");
     dbmgr.SetCompression(6);
 
-    // _scp->variables.Set("@version_short",_ver_short);
-    // _scp->variables.Set("@version",_ver);
-    // _scp->variables.Set("@inworld","false");
-
-    // if(!_scp->LoadScriptFromFile("./_startup.def"))
-    // {
-    //     logerror("Error loading '_startup.def'");
-    //     SetError();
-    // }
-    // else if(!_scp->BoolRunScript("_startup",NULL))
-    // {
-    //     logerror("Error executing '_startup.def'");
-    //     SetError();
-    // }
     _conf->ApplyFromVarSet();
 
 
@@ -127,10 +90,8 @@ void PseuInstance::Run(void)
     if(!_initialized)
         return;
 
-    logdetail("PseuInstance: Initialized and running!");
+    logdetail("Initialized and running!");
 
-    // TODO: as soon as username and password can be inputted into the gui, wait until it was set by user.
-    //pybot--hier realmlist einstellen
     if(GetConf()->realmlist.empty() || GetConf()->realmport==0)
     {
         logcritical("Realmlist address not set, can't connect.");
@@ -155,40 +116,10 @@ void PseuInstance::Run(void)
 
     }
 
-    // fastquit is defined if we clicked [X] (on windows)
-    // If softquit is set, do not terminate forcefully, but shut it down instead
-    if(_fastquit && !_conf->softquit)
-    {
-        log("Aborting Instance...");
-        return;
-    }
-
-    log("Shutting down instance...");
-
-
-
-    // if(GetScripts()->ScriptExists("_onexit"))
-    // {
-    //     CmdSet Set;
-    //     Set.arg[0] = DefScriptTools::toString(_error);
-    //     GetScripts()->RunScript("_onexit",&Set);
-    // }
-
-    if(GetConf()->exitonerror == false && _error)
-    {
-        log("Exiting on error is disabled, PseuWoW is now IDLE");
-        log("-- Press enter to exit --");
-        char crap[100];
-        fgets(crap,sizeof(crap),stdin); // workaround, need to press enter 2x for now
-    }
-
 }
 
 void PseuInstance::Update()
 {
-    // if the user typed anything into the console, process it before anything else.
-    // note that it can also be used for simulated cli commands sent by other threads, so it needs to be checked even if cli is disabled
-    ProcessCliQueue();
 
     // delete sessions if they are no longer needed
     if(_rsession && _rsession->MustDie())
@@ -225,18 +156,15 @@ void PseuInstance::Update()
     {
         if(GetConf()->accname.empty() || GetConf()->accpass.empty())
         {
-            logdev("Skipping reconnect, acc name or password not set");
+            logdev("acc name or password not set");
         }
         else
-        {   // everything fine, we have all data
-            logdetail("Waiting %u ms before reconnecting.",GetConf()->reconnect);
-            for(uint32 t = 0; t < GetConf()->reconnect && !this->Stopped(); t+=100) usleep(100);
-            usleep(1000); // wait 1 sec before reconnecting
+        {
+            logdetail("Waiting 2sec before reconnecting.");
+            sleep(2);
             CreateRealmSession();
         }
-    }
-
-    //logdetail("Disconnected, switching GUI back to Loginscreen.");
+    }    
 
     // update currently existing/active sessions
     if(_rsession)
@@ -248,33 +176,9 @@ void PseuInstance::Update()
         }
 
 
-    // GetScripts()->GetEventMgr()->Update();
-
-    usleep(GetConf()->networksleeptime);
+    usleep(GetConf()->networksleeptime * 1000); //if networksleeptime is 1 then it wait 1ms
 }
 
-void PseuInstance::ProcessCliQueue(void)
-{
-    std::string cmd;
-    while(_cliQueue.size())
-    {
-        cmd = _cliQueue.front();
-        _cliQueue.pop();
-        try
-        {
-            //GetScripts()->RunSingleLine(cmd);
-        }
-        catch(...)
-        {
-            logerror("Exception while executing (HAB ICH AUS GEMACHT) CLI command: \"%s\"",cmd.c_str());
-        }
-    }
-}
-
-void PseuInstance::AddCliCommand(std::string cmd)
-{
-    _cliQueue.push(cmd);
-}
 
 void PseuInstance::SaveAllCache(void)
 {
@@ -313,7 +217,11 @@ PseuInstanceConf::PseuInstanceConf()
 
 void PseuInstanceConf::ApplyFromVarSet(void)
 {
-    debug=3;
+    // 0 - No debug output (white text) (Default)
+    // 1 - Log some details (cyan text)
+    // 2 - Full debug log (dark blue text)
+    // 3 - Even more debug logging (purple text, useful only for developers)
+    debug=1;
     realmlist="localhost";
     accname="myacc";
     accpass="mypass2";
@@ -325,7 +233,11 @@ void PseuInstanceConf::ApplyFromVarSet(void)
     realmname="Trinity";
     charname="Elodin";
     networksleeptime=1;
-    showopcodes=3;
+    // 0 - show none (Default)
+    // 1 - show only known/handled
+    // 2 - show only unknown/unhandled
+    // 3 - show all
+    showopcodes=0;
     hidefreqopcodes=true;
     hideDisabledOpcodes=true;
     enablecli=true;

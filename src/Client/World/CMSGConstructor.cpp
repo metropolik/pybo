@@ -226,4 +226,13 @@ void WorldSession::SendCharCreate(std::string name, uint8 race, uint8 class_, //
     AddSendWorldPacket(wp);
 }
 
+void WorldSession::SendKeepAlive()
+{
+    if(!_logged)
+        return;
+    WorldPacket packet;
+    packet.SetOpcode(CMSG_KEEP_ALIVE);
+    SendWorldPacket(packet);
+}
+
 

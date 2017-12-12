@@ -57,7 +57,6 @@ private:
     std::queue<ByteBuffer*> pktQueue;
     RealmSocket *_socket;
     uint8 _m2[20];
-    RealmSession *_session;
     BigNumber _key;
     bool _mustdie;
     bool _filetransfer;

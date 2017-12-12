@@ -105,6 +105,7 @@ public:
     void SendQueryCreature(uint32 entry, uint64 guid = 0);
     void SendQueryGameobject(uint32 entry, uint64 guid = 0);
     void SendCharCreate(std::string name, uint8 race, uint8 class_, uint8 gender=0, uint8 skin=0, uint8 face=0, uint8 hairstyle=0, uint8 haircolor=0, uint8 facial=0, uint8 outfit=0);
+    void SendKeepAlive(void);
 
     void HandleWorldPacket(WorldPacket*);
 

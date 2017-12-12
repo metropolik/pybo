@@ -34,8 +34,7 @@ void MovementMgr::SetInstance(PseuInstance *inst)
 void MovementMgr::_BuildPacket(uint16 opcode)
 {
     WorldPacket *wp = new WorldPacket(opcode,4+2+4+16); // it can be larger, if we are jumping, on transport or swimming
-    if(_instance->GetConf()->client > CLIENT_TBC)
-      wp->appendPackGUID(_mychar->GetGUID());
+    wp->appendPackGUID(_mychar->GetGUID());
     MovementInfo mi;
     mi.SetMovementFlags(_moveFlags);
     mi.time = getMSTime();

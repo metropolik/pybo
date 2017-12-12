@@ -124,7 +124,7 @@ void WorldSession::AddToPktQueue(WorldPacket *pkt)
 
 void WorldSession::SendWorldPacket(WorldPacket &pkt)
 {
-    if(GetInstance()->GetConf()->showmyopcodes)
+    if(GetInstance()->GetConf()->showmyopcodes && pkt.GetOpcode() != CMSG_KEEP_ALIVE)
         logcustom(0,BROWN,"<< Opcode %u [%s] (%u bytes)", pkt.GetOpcode(), GetOpcodeName(pkt.GetOpcode()), pkt.size());
     if(_socket && _socket->IsOk())
         _socket->SendWorldPacket(pkt);
@@ -427,15 +427,27 @@ void WorldSession::_OnLeaveWorld(void)
 
 void WorldSession::_DoTimedActions(void)
 {
-    static clock_t pingtime=0;
+    static time_t pingtime=0;
+    static time_t nextKeepAliveTime = 0;
+    static time_t timeOfFirstStart = time(0);
+
     if(InWorld())
-    {
-        if(pingtime < clock())
-        {
-            pingtime=clock() + 30*CLOCKS_PER_SEC;
-            SendPing(clock());
+    {        
+        timeval now_p;
+        gettimeofday(&now_p, NULL);
+        time_t now = now_p.tv_sec;
+
+//        if(pingtime < now) //some error causes trinity core to notice weird ping requests
+//        {
+//            uint32 msSinceStart = (uint32)((now - timeOfFirstStart)*1000) + (uint32)(now_p.tv_usec/1000);
+//            pingtime=now + 30;
+//            SendPing(msSinceStart);
+//        }
+        if (nextKeepAliveTime < now) {
+            nextKeepAliveTime = now + 15;
+            SendEmote(TEXTEMOTE_YAWN);
+            SendKeepAlive();
         }
-        //...
     }
 }
 
@@ -1077,12 +1089,17 @@ void WorldSession::_HandleNameQueryResponseOpcode(WorldPacket& recvPacket)
 }
 
 void WorldSession::_HandlePongOpcode(WorldPacket& recvPacket)
-{
+{    
+    static time_t timeOfFirstStart = time(0);
+    timeval now_p;
+    gettimeofday(&now_p, NULL);
+    time_t now = now_p.tv_sec;
+    uint32 msSinceStart = (uint32)((now - timeOfFirstStart)*1000) + (uint32)(now_p.tv_usec/1000);
     uint32 pong;
     recvPacket >> pong;
-    _lag_ms = clock() - pong;
-    if(GetInstance()->GetConf()->notifyping)
-        log("Received Ping reply: %u ms latency.", _lag_ms);
+    _lag_ms = msSinceStart - pong;
+    //if(GetInstance()->GetConf()->notifyping)
+    log("Received Ping reply: %u ms latency.", _lag_ms);
 }
 void WorldSession::_HandleTradeStatusOpcode(WorldPacket& recvPacket)
 {
@@ -1488,78 +1505,78 @@ void WorldSession::_HandleTextEmoteOpcode(WorldPacket& recvPacket)
     }
 
     logdebug(I64FMT " Emote: name=%s text=%u variation=%i len=%u",guid,name.c_str(),emotetext,emotev,namelen);
-    SCPDatabaseMgr& dbmgr = GetInstance()->dbmgr;
-    SCPDatabase *emotedb = dbmgr.GetDB("emote");
-    if(emotedb)
-    {
-        std::string target,target2;
-        bool targeted=false; // if the emote is directed to anyone around or a specific target
-        bool targeted_me=false; // if the emote was targeted to us if it was targeted
-        bool from_me=false; // if we did the emote
-        bool female=false; // if emote causer is female
+//    SCPDatabaseMgr& dbmgr = GetInstance()->dbmgr;
+//    SCPDatabase *emotedb = dbmgr.GetDB("emote");
+//    if(emotedb)
+//    {
+//        std::string target,target2;
+//        bool targeted=false; // if the emote is directed to anyone around or a specific target
+//        bool targeted_me=false; // if the emote was targeted to us if it was targeted
+//        bool from_me=false; // if we did the emote
+//        bool female=false; // if emote causer is female
 
-        if(GetMyChar()->GetGUID() == guid) // we caused the emote
-            from_me=true;
+//        if(GetMyChar()->GetGUID() == guid) // we caused the emote
+//            from_me=true;
 
-        if(name.length()) // is it directed to someone?
-        {
-            targeted=true; // if yes, we have a target
-            if(GetMyChar()->GetName() == name) // if the name is ours, its directed to us
-                targeted_me=true;
-        }
+//        if(name.length()) // is it directed to someone?
+//        {
+//            targeted=true; // if yes, we have a target
+//            if(GetMyChar()->GetName() == name) // if the name is ours, its directed to us
+//                targeted_me=true;
+//        }
 
-        Unit *u = (Unit*)objmgr.GetObj(guid);
-        if(u)
-        {
-            if(u->GetGender() != 0) // female
-                female=true;
-            name_from = u->GetName();
-        }
+//        Unit *u = (Unit*)objmgr.GetObj(guid);
+//        if(u)
+//        {
+//            if(u->GetGender() != 0) // female
+//                female=true;
+//            name_from = u->GetName();
+//        }
 
-        // if we targeted ourself, the general emote is used!
-        if(targeted && from_me && targeted_me)
-            targeted_me=false;
+//        // if we targeted ourself, the general emote is used!
+//        if(targeted && from_me && targeted_me)
+//            targeted_me=false;
 
-        // now build the string that is used to lookup the text in the database
-        if(from_me)
-            target += "me";
-        else
-            target += "one";
+//        // now build the string that is used to lookup the text in the database
+//        if(from_me)
+//            target += "me";
+//        else
+//            target += "one";
 
-        if(targeted)
-        {
-            target += "to";
-            if(targeted_me)
-                target += "me";
-            else
-                target += "one";
-        }
-        else
-            target += "general";
+//        if(targeted)
+//        {
+//            target += "to";
+//            if(targeted_me)
+//                target += "me";
+//            else
+//                target += "one";
+//        }
+//        else
+//            target += "general";
 
-        // not all emotes have a female version, so check if there is one in the database
-        if(female && emotedb->GetFieldId((char*)(target + "female").c_str()) != SCP_INVALID_INT)
-                target += "female";
+//        // not all emotes have a female version, so check if there is one in the database
+//        if(female && emotedb->GetFieldId((char*)(target + "female").c_str()) != SCP_INVALID_INT)
+//                target += "female";
 
-        logdebug("Looking up 'emote' SCP field %u entry '%s'",emotetext,target.c_str());
+//        logdebug("Looking up 'emote' SCP field %u entry '%s'",emotetext,target.c_str());
 
-        std::string etext;
-        etext = emotedb->GetString(emotetext,(char*)target.c_str());
+//        std::string etext;
+//        etext = emotedb->GetString(emotetext,(char*)target.c_str());
 
-        char out[300]; // should be enough
+//        char out[300]; // should be enough
 
-        if(from_me)
-            sprintf(out,etext.c_str(),name.c_str());
-        else
-            sprintf(out,etext.c_str(),name_from.c_str(),name.c_str());
+//        if(from_me)
+//            sprintf(out,etext.c_str(),name.c_str());
+//        else
+//            sprintf(out,etext.c_str(),name_from.c_str(),name.c_str());
 
-        logcustom(0,WHITE,"EMOTE: %s",out);
+//        logcustom(0,WHITE,"EMOTE: %s",out);
 
-    }
-    else
-    {
-        logerror("Can't display emote text %u, SCP database \"emote\" not loaded.",emotetext);
-    }
+//    }
+//    else
+//    {
+//        logerror("Can't display emote text %u, SCP database \"emote\" not loaded.",emotetext);
+//    }
 
 }
 
