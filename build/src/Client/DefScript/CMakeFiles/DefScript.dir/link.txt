@@ -1,2 +1,0 @@
-/usr/bin/ar qc libDefScript.a  CMakeFiles/DefScript.dir/DefScriptBBFunctions.cpp.o CMakeFiles/DefScript.dir/DefScriptFileFunctions.cpp.o CMakeFiles/DefScript.dir/DefScriptListFunctions.cpp.o CMakeFiles/DefScript.dir/DynamicEvent.cpp.o CMakeFiles/DefScript.dir/DefScript.cpp.o CMakeFiles/DefScript.dir/DefScriptFunctions.cpp.o CMakeFiles/DefScript.dir/DefScriptTools.cpp.o CMakeFiles/DefScript.dir/VarSet.cpp.o
-/usr/bin/ranlib libDefScript.a
