@@ -18,9 +18,10 @@ MovementMgr::~MovementMgr()
 {
 }
 
+
 void MovementMgr::SetInstance(PseuInstance *inst)
 {
-    _movemode = MOVEMODE_MANUAL;
+    _movemode = MOVEMODE_AUTO;
     _instance = inst;
     _mychar = inst->GetWSession()->GetMyChar();
     if(!_mychar)
@@ -86,7 +87,7 @@ void MovementMgr::Update(bool sendDirect)
                 _jumptime = 0.0f;
                 _moveFlags &= ~MOVEMENTFLAG_JUMPING;
             }
-        }
+        } */
 
         if(_movemode == MOVEMODE_AUTO)
         {
@@ -114,28 +115,29 @@ void MovementMgr::Update(bool sendDirect)
             }
         }
         // ...
-        if(_moveFlags & MOVEMENTFLAG_LEFT)
-        {
-            pos.o += turnspeed;
-        }
-        if(_moveFlags & MOVEMENTFLAG_RIGHT)
-        {
-            pos.o -= turnspeed;
-        }
-        if(pos.o < 0)
-            pos.o += float(2 * M_PI);
-        else if(pos.o > 2 * M_PI)
-            pos.o -= float(2 * M_PI);
-        //pos.z = _instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y);
+//        if(_moveFlags & MOVEMENTFLAG_LEFT)
+//        {
+//            pos.o += turnspeed;
+//        }
+//        if(_moveFlags & MOVEMENTFLAG_RIGHT)
+//        {
+//            pos.o -= turnspeed;
+//        }
+//        if(pos.o < 0)
+//            pos.o += float(2 * M_PI);
+//        else if(pos.o > 2 * M_PI)
+//            pos.o -= float(2 * M_PI);
+//        //pos.z = _instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y);
 
         if(_movemode == MOVEMODE_AUTO)
         {
             _mychar->SetPosition(pos);
         }
-    }*/
+//    }
 
     // if we are moving, and 500ms have passed, send an heartbeat packet. just in case 500ms have passed but the packet is sent by another function, do not send here
-    if( !sendDirect && (_moveFlags & MOVEMENTFLAG_ANY_MOVE_NOT_TURNING) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime())
+    //if( !sendDirect && (_moveFlags & MOVEMENTFLAG_ANY_MOVE_NOT_TURNING) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime())
+    if( !sendDirect && (_moveFlags > 0) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime())
     {
         _BuildPacket(MSG_MOVE_HEARTBEAT);
 

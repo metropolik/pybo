@@ -427,26 +427,41 @@ void WorldSession::_OnLeaveWorld(void)
 
 void WorldSession::_DoTimedActions(void)
 {
-    static time_t pingtime=0;
-    static time_t nextKeepAliveTime = 0;
-    static time_t timeOfFirstStart = time(0);
-
+    static uint32 pingtime=0;
+    static uint32 nextKeepAlive = 0;
+    static uint32 nextYawn = 0;
+    static uint32 nextEveryTen = 0;
+    static bool shouldWalk = false;
     if(InWorld())
     {        
-        timeval now_p;
-        gettimeofday(&now_p, NULL);
-        time_t now = now_p.tv_sec;
+        uint32 now = getMSTime();
 
 //        if(pingtime < now) //some error causes trinity core to notice weird ping requests
 //        {
-//            uint32 msSinceStart = (uint32)((now - timeOfFirstStart)*1000) + (uint32)(now_p.tv_usec/1000);
 //            pingtime=now + 30;
-//            SendPing(msSinceStart);
+//            SendPing(getMSTime());
 //        }
-        if (nextKeepAliveTime < now) {
-            nextKeepAliveTime = now + 15;
-            SendEmote(TEXTEMOTE_YAWN);
+        if (nextKeepAlive < now) {
+            nextKeepAlive = now + 15000;
             SendKeepAlive();
+        }
+        if (nextYawn < now) {
+            nextYawn = now + 90000;
+            SendEmote(TEXTEMOTE_YAWN);
+        }
+
+        if (nextEveryTen < now) {
+            nextEveryTen = now + 10000;
+            if (shouldWalk == false) {
+                _world->GetMoveMgr()->MoveStop();
+                _world->GetMoveMgr()->MoveStopTurn();
+            } else {
+                logdetail("Start walking!");
+                _world->GetMoveMgr()->MoveStartForward();
+                _world->GetMoveMgr()->MoveStartTurnLeft();
+            }
+            shouldWalk = !shouldWalk;
+
         }
     }
 }
