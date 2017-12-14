@@ -33,3 +33,4 @@
 
 bin/
 build/
+CMakeLists.txt.user #Qt Creator specific I guess 
