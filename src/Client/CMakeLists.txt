@@ -14,8 +14,10 @@ if(UNIX)
   set(PSEUWOW_LIBS ${PSEUWOW_LIBS} GL Xxf86vm bz2)
 endif()
 
-
-
+#python
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
+SET(PSEUWOW_LIBS "${PSEUWOW_LIBS} ${PYTHON_LIBRARIES}")
 
 add_executable (pseuwow
 Realm/RealmSession.cpp
@@ -41,6 +43,8 @@ World/World.cpp
 World/WorldPacket.cpp
 World/WorldSession.cpp
 World/WorldSocket.cpp
+
+World/PyBehaviour.cpp
 
 main.cpp
 PseuWoW.cpp

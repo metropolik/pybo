@@ -13,6 +13,7 @@
 #include "ObjMgr.h"
 #include "CacheHandler.h"
 #include "Opcodes.h"
+#include "PyBehaviour.h"
 
 class WorldSocket;
 class WorldPacket;
@@ -187,6 +188,7 @@ private:
     CharList _charList;
     uint32 _lag_ms;
     std::bitset<MAX_OPCODE_ID> _disabledOpcodes;
+    PyBehaviour* pyBehaviour;
 
 };
 

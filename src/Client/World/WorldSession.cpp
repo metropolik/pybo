@@ -48,7 +48,7 @@ WorldSession::WorldSession(PseuInstance *in)
     _SetupObjectFields();
     MovementInfo::_c=in->GetConf()->client;
 
-    // in->GetScripts()->RunScriptIfExists("_onworldsessioncreate");
+    pyBehaviour = new PyBehaviour();
 
     DEBUG(logdebug("WorldSession 0x%X constructor finished",this));
 }
@@ -463,6 +463,7 @@ void WorldSession::_DoTimedActions(void)
             shouldWalk = !shouldWalk;
 
         }
+        pyBehaviour->update();
     }
 }
 
