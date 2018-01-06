@@ -54,11 +54,6 @@ bool PseuInstance::Init(void)
     log_setloglevel(0);    
     log("--- Initializing Instance ---");
 
-    if(_confdir.empty())
-        _confdir="./conf/";
-    if(_scpdir.empty())
-        _scpdir="./scripts/";
-
     srand((unsigned)time(NULL));
     RAND_set_rand_method(RAND_SSLeay()); // init openssl randomizer
 
@@ -85,10 +80,10 @@ bool PseuInstance::Init(void)
 }
 
 
-void PseuInstance::Run(void)
+int PseuInstance::Run(void)
 {
     if(!_initialized)
-        return;
+        return -1;
 
     logdetail("Initialized and running!");
 
@@ -112,9 +107,8 @@ void PseuInstance::Run(void)
             if(_error)
                 _stop=true;
         }
-
-
     }
+    return _error;
 
 }
 
