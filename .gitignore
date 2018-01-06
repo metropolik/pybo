@@ -7,6 +7,8 @@
 *.o
 *.obj
 
+CMakeLists.txt.user #Qt Creator specific I guess 
+
 # Precompiled Headers
 *.gch
 *.pch
@@ -33,4 +35,3 @@
 
 bin/
 build/
-CMakeLists.txt.user #Qt Creator specific I guess 

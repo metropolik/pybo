@@ -91,11 +91,8 @@ public:
     inline RealmSession *GetRSession(void) { return _rsession; }
     inline PseuInstanceConf *GetConf(void) { return _conf; }
 
-    void DeleteGUI(void);
     bool ConnectToRealm(void);
 
-    inline void SetConfDir(std::string dir) { _confdir = dir; }
-    inline std::string GetConfDir(void) { return _confdir; }
     inline void SetScpDir(std::string dir) { _scpdir = dir; }
     inline void SetSessionKey(BigNumber key) { _sessionkey = key; }
     inline BigNumber *GetSessionKey(void) { return &_sessionkey; }
@@ -106,7 +103,7 @@ public:
     inline void Stop(void) { _stop = true; }
     inline bool Stopped(void) { return _stop; }
     inline void SetFastQuit(bool q=true) { _fastquit=true; }
-    void Run(void);
+    int Run(void);
     void Update(void);
     void Sleep(uint32 msecs);
 
