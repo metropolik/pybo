@@ -48,7 +48,6 @@ World/PyBehaviour.cpp
 
 main.cpp
 PseuWoW.cpp
-SCPDatabase.cpp
 )
 
 

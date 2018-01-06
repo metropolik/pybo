@@ -61,10 +61,6 @@ bool PseuInstance::Init(void)
 
     CreateDir("cache");
 
-    dbmgr.AddSearchPath("./cache");
-    dbmgr.AddSearchPath("./data/scp");
-    dbmgr.SetCompression(6);
-
     _conf->ApplyFromVarSet();
 
 

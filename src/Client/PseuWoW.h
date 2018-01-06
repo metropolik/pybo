@@ -6,7 +6,6 @@
 #include "HelperDefs.h"
 #include "Auth/BigNumber.h"
 #include "Network/SocketHandler.h"
-#include "SCPDatabase.h"
 #include <queue>
 
 class RealmSession;
@@ -97,7 +96,6 @@ public:
     inline void SetSessionKey(BigNumber key) { _sessionkey = key; }
     inline BigNumber *GetSessionKey(void) { return &_sessionkey; }
     inline void SetError(void) { _error = true; }
-    SCPDatabaseMgr dbmgr;
 
     bool Init(void);
     inline void Stop(void) { _stop = true; }

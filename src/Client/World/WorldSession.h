@@ -65,7 +65,6 @@ public:
     void Init(void);
 
     inline PseuInstance *GetInstance(void) { return _instance; }
-    inline SCPDatabaseMgr& GetDBMgr(void) { return GetInstance()->dbmgr; }
 
     void AddToPktQueue(WorldPacket *pkt);
     void Update(void);

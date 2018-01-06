@@ -450,19 +450,19 @@ void WorldSession::_DoTimedActions(void)
             SendEmote(TEXTEMOTE_YAWN);
         }
 
-        if (nextEveryTen < now) {
-            nextEveryTen = now + 10000;
-            if (shouldWalk == false) {
-                _world->GetMoveMgr()->MoveStop();
-                _world->GetMoveMgr()->MoveStopTurn();
-            } else {
-                logdetail("Start walking!");
-                _world->GetMoveMgr()->MoveStartForward();
-                _world->GetMoveMgr()->MoveStartTurnLeft();
-            }
-            shouldWalk = !shouldWalk;
+//        if (nextEveryTen < now) {
+//            nextEveryTen = now + 10000;
+//            if (shouldWalk == false) {
+//                _world->GetMoveMgr()->MoveStop();
+//                _world->GetMoveMgr()->MoveStopTurn();
+//            } else {
+//                logdetail("Start walking!");
+//                _world->GetMoveMgr()->MoveStartForward();
+//                _world->GetMoveMgr()->MoveStartTurnLeft();
+//            }
+//            shouldWalk = !shouldWalk;
 
-        }
+//        }
         pyBehaviour->update();
     }
 }
@@ -668,7 +668,7 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
             recvPacket >> plr[i]._petLevel;
             recvPacket >> plr[i]._petFamilyId;
             size_t sizeWithInventory = recvPacket.size();
-            for(unsigned int inv=0;inv<23;inv++)
+            for(unsigned int inv=0; inv<23; inv++)
             {
                 recvPacket >> plr[i]._items[inv].displayId >> plr[i]._items[inv].inventorytype ;
                 if(GetInstance()->GetConf()->client > CLIENT_CLASSIC_WOW)
@@ -683,23 +683,11 @@ void WorldSession::_HandleCharEnumOpcode(WorldPacket& recvPacket)
         }
         char_found=false;
 
-        SCPDatabase *zonedb = GetDBMgr().GetDB("zone"),
-                    *racedb = GetDBMgr().GetDB("race"),
-                    *mapdb = GetDBMgr().GetDB("map"),
-                    *classdb = GetDBMgr().GetDB("class");
         char *zonename, *racename, *mapname, *classname;
         zonename = racename = mapname = classname = "";
 
         for(unsigned int i=0;i<num;i++)
         {
-            if(zonedb)
-                zonename = zonedb->GetString(plr[i]._zoneId, "name");
-            if(racedb)
-                racename = racedb->GetString(plr[i]._race, "name");
-            if(mapdb)
-                mapname = mapdb->GetString(plr[i]._mapId, "name");
-            if(classdb)
-                classname = classdb->GetString(plr[i]._class, "name");
 
             CharacterListExt cx;
             cx.p = plr[i];
@@ -917,11 +905,8 @@ void WorldSession::_HandleMessageChatOpcode(WorldPacket& recvPacket) //TODO: REW
     recvPacket >> chatTag;
 
 
-    SCPDatabase *langdb = GetDBMgr().GetDB("language");
     const char* ln;
-    std::string langname;
-    if(langdb)
-        langname = langdb->GetString(lang,"name");
+    std::string langname = "Implement the db kek hab SCP rausgeloescht";
     ln = langname.c_str();
     std::string name = source_name;
 
@@ -1645,21 +1630,10 @@ void WorldSession::_HandleWhoOpcode(WorldPacket& recvPacket)
         while(wle.name.length() < 13)
             wle.name.append(" ");
 
-        SCPDatabaseMgr& db = GetInstance()->dbmgr;
         char classname[20], racename[20];
         std::string zonename;
         memset(classname,0,sizeof(classname));
         memset(racename,0,sizeof(racename));
-
-        SCPDatabase *zonedb = db.GetDB("zone"),
-                    *racedb = db.GetDB("race"),
-                    *classdb = db.GetDB("class");
-        if(zonedb)
-            zonename = zonedb->GetString(wle.zoneId, "name");
-        if(racedb)
-            strcpy(racename,racedb->GetString(wle.raceId, "name"));
-        if(classdb)
-            strcpy(classname,classdb->GetString(wle.classId, "name"));
 
         for(uint8 i = strlen(classname); strlen(classname) < 10; i++)
             classname[i] = ' ';
@@ -1811,15 +1785,6 @@ void WorldSession::_HandleCharCreateOpcode(WorldPacket& recvPacket)
     {
         logerror("Character creation error, response=%u", response);
     }
-    if(SCPDatabase *db = GetInstance()->dbmgr.GetDB("generic_text"))
-    {
-        // convert response number to field name (simple int to string)
-        char buf[20];
-        sprintf(buf,"%u",response);
-        std::string response_str = db->GetString(0, buf); // data are expected to be at index 0
-        log("Response String: '%s'",response_str.c_str());
-    }
-
 }
 
 void WorldSession::_HandleMonsterMoveOpcode(WorldPacket& recvPacket)
