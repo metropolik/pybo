@@ -109,11 +109,11 @@ void WorldSession::Start(void)
 
 void WorldSession::_LoadCache(void)
 {
-    logdetail("Loading Cache...");
-    plrNameCache.ReadFromFile(); // load names/guids of known players
-    ItemProtoCache_InsertDataToSession(this);
-    CreatureTemplateCache_InsertDataToSession(this);
-    GOTemplateCache_InsertDataToSession(this);
+//    logdetail("Loading Cache...");
+//    plrNameCache.ReadFromFile(); // load names/guids of known players
+//    ItemProtoCache_InsertDataToSession(this);
+//    CreatureTemplateCache_InsertDataToSession(this);
+//    GOTemplateCache_InsertDataToSession(this);
     //...
 }
 
@@ -125,7 +125,7 @@ void WorldSession::AddToPktQueue(WorldPacket *pkt)
 void WorldSession::SendWorldPacket(WorldPacket &pkt)
 {
     if(GetInstance()->GetConf()->showmyopcodes && pkt.GetOpcode() != CMSG_KEEP_ALIVE)
-        logcustom(0,BROWN,"<< Opcode %u [%s] (%u bytes)", pkt.GetOpcode(), GetOpcodeName(pkt.GetOpcode()), pkt.size());
+        logcustom(1,BROWN,"<< Opcode %u [%s] (%u bytes)", pkt.GetOpcode(), GetOpcodeName(pkt.GetOpcode()), pkt.size());
     if(_socket && _socket->IsOk())
         _socket->SendWorldPacket(pkt);
     else
@@ -1131,59 +1131,20 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     MovementInfo mi;
     guid = recvPacket.readPackGUID();
     recvPacket >> mi;
-    log("MOVE: "I64FMT" -> time=%u flags=0x%X x=%.4f y=%.4f z=%.4f o=%.4f",guid,mi.time,mi.flags,mi.pos.x,mi.pos.y,mi.pos.z,mi.pos.o);
+    logdev("MOVE: "I64FMT" -> time=%u flags=0x%X x=%.4f y=%.4f z=%.4f o=%.4f",guid,mi.time,mi.flags,mi.pos.x,mi.pos.y,mi.pos.z,mi.pos.o);
     Object *obj = objmgr.GetObj(guid);
     if(obj && obj->IsWorldObject())
     {
         ((WorldObject*)obj)->SetPosition(mi.pos.x,mi.pos.y,mi.pos.z,mi.pos.o);
     }    
-//    MyCharacter *mychar = GetMyChar();
-//    mychar->SetPosition(mi.pos.x, mi.pos.y, mychar->GetPosition().z, mi.pos.o);
-    //TODO: Eval rest of Packet!!
-//    switch(recvPacket.GetOpcode()) {
-//        case MSG_MOVE_START_STRAFE_LEFT:
-//        case MSG_MOVE_START_STRAFE_RIGHT:
-//        case MSG_MOVE_START_FORWARD:
-//            GetWorld()->GetMoveMgr()->MoveStartForward();
-//            break;
-//        case MSG_MOVE_STOP:
-//            GetWorld()->GetMoveMgr()->MoveStop();
-//            break;
-//        case MSG_MOVE_STOP_TURN:
-//            GetWorld()->GetMoveMgr()->MoveStopTurn();
-//            break;
-//        case MSG_MOVE_START_TURN_LEFT:
-//            GetWorld()->GetMoveMgr()->MoveStartTurnLeft();
-//            break;
-//        case MSG_MOVE_START_TURN_RIGHT:
-//            GetWorld()->GetMoveMgr()->MoveStartTurnRight();
-//            break;
-//        case MSG_MOVE_HEARTBEAT:
-//            GetWorld()->GetMoveMgr()->forceHeartbeat();
-//            break;
-//        case MSG_MOVE_SET_FACING:
-//            MyCharacter *mychar = GetMyChar();
-//            mychar->SetPosition(mychar->GetPosition().x, mychar->GetPosition().y, mychar->GetPosition().z, mi.pos.o);
-//            GetWorld()->GetMoveMgr()->MoveSetFacing();
-//            break;
-//    }
-
-    WorldPacket *wp = new WorldPacket(recvPacket.GetOpcode(),4+2+4+16); // it can be larger, if we are jumping, on transport or swimming
-    wp->appendPackGUID(GetMyChar()->GetGUID());
-    MovementInfo nmi;
-    nmi.SetMovementFlags(mi.flags);
-    nmi.time = getMSTime();
-    nmi.pos = mi.pos;
-    nmi.fallTime = mi.fallTime;
-
-    if (recvPacket.GetOpcode() == MSG_MOVE_HEARTBEAT) {
-        float movespeed = GetMyChar()->GetSpeed(MOVE_RUN);
-        nmi.pos.x += movespeed * sin(mi.pos.o + (M_PI/2));
-        nmi.pos.y -= movespeed * cos(mi.pos.o + (M_PI/2));
+    GetWorld()->GetMoveMgr()->walkStraightToTarget(mi.pos);
+    WorldPosition currentPosition = GetMyChar()->GetPosition();
+    currentPosition.z = mi.pos.z;
+    if (recvPacket.GetOpcode() == MSG_MOVE_STOP) {
+        currentPosition.x = mi.pos.x;
+        currentPosition.y = mi.pos.y;
     }
-
-    *wp << mi;
-    _instance->GetWSession()->AddSendWorldPacket(wp);
+    GetMyChar()->SetPosition(currentPosition);
 
 }
 
@@ -1320,7 +1281,7 @@ void WorldSession::_HandleTelePortAckOpcode(WorldPacket& recvPacket)
     guid = recvPacket.readPackGUID();
     recvPacket >> unk32 >> mi;
 
-    logdetail("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, mi.pos.x, mi.pos.y, mi.pos.z, mi.pos.o, guid);
+    log("Got teleported, data: x: %f, y: %f, z: %f, o: %f, guid: "I64FMT, mi.pos.x, mi.pos.y, mi.pos.z, mi.pos.o, guid);
 
     _world->UpdatePos(mi.pos.x,mi.pos.y);
     _world->Update();

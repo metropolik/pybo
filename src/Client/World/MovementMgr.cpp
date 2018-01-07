@@ -4,15 +4,17 @@
 #include "MovementMgr.h"
 #include "Player.h"
 #include "MovementInfo.h"
+#include <math.h>
 
 MovementMgr::MovementMgr()
 {
     _moveFlags = 0;
     _instance = NULL;
     _optime = 0;
-    _updatetime = 0;
+    lastUpdateTime = 0;
     heartbeatEnabled = true;
     _moved = false;
+    walkingToTarget = false;
 }
 
 MovementMgr::~MovementMgr()
@@ -22,8 +24,8 @@ MovementMgr::~MovementMgr()
 
 void MovementMgr::SetInstance(PseuInstance *inst)
 {
-    _movemode = MOVEMODE_MANUAL;
-    //_movemode = MOVEMODE_AUTO;
+    //_movemode = MOVEMODE_MANUAL;
+    _movemode = MOVEMODE_AUTO;
     _instance = inst;
     _mychar = inst->GetWSession()->GetMyChar();
     if(!_mychar)
@@ -63,12 +65,12 @@ void MovementMgr::_BuildPacket(uint16 opcode)
 void MovementMgr::Update(bool sendDirect)
 {
     uint32 curtime = getMSTime();
-    uint32 timediff = curtime - _updatetime;
-    _updatetime = curtime;
+    uint32 timediff = curtime - lastUpdateTime;
+    lastUpdateTime = curtime;
 
     WorldPosition pos = _mychar->GetPosition();
-    float turnspeed = _mychar->GetSpeed(MOVE_TURN) / 1000.0f * timediff;    
-    float totalDistance = _mychar->GetSpeed(MOVE_RUN) / 1000.0f * timediff;
+//    float turnspeed = _mychar->GetSpeed(MOVE_TURN) / 1000.0f * timediff;
+    float totalDistance = _mychar->GetSpeed(MOVE_RUN) * (timediff / 1000.0f);
     // or use walkspeed, depending on setting. for now use only runspeed
     // TODO: calc other speeds as soon as implemented
 /*
@@ -99,10 +101,10 @@ void MovementMgr::Update(bool sendDirect)
                 WorldPosition oldpos = pos;
                 pos.x += totalDistance * sin(pos.o + (M_PI/2));
                 pos.y -= totalDistance * cos(pos.o + (M_PI/2));
-                if (_instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y) > 5.0f + pos.z)
-                {
-                    pos = oldpos;
-                }
+//                if (_instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y) > 5.0f + pos.z)
+//                {
+//                    pos = oldpos;
+//                }
             }
             if(_moveFlags & MOVEMENTFLAG_BACKWARD)
             {
@@ -110,12 +112,22 @@ void MovementMgr::Update(bool sendDirect)
                 WorldPosition oldpos = pos;
                 pos.x -= totalDistance * sin(pos.o + (M_PI/2));
                 pos.y += totalDistance * cos(pos.o + (M_PI/2));
-                if (_instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y) > 5.0f + pos.z)
-                {
-                    pos = oldpos;
-                }
+//                if (_instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y) > 5.0f + pos.z)
+//                {
+//                    pos = oldpos;
+//                }
             }
             _mychar->SetPosition(pos);
+            if (walkingToTarget && distToTarget() < 0.5) {
+                MoveStop();
+                walkingToTarget = false;
+                std::cout << "stoping" << std::endl;
+            }
+            static uint32 lastPrint = 0;
+            if (getMSTime() - lastPrint > 500) {
+                std::cout << distToTarget() << std::endl;
+                lastPrint = getMSTime();
+            }
         }        
 //    }
 
@@ -265,18 +277,35 @@ bool MovementMgr::IsStrafing(void)
     return _moveFlags & (MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT);
 }
 
-void MovementMgr::forceHeartbeat()
+void MovementMgr::walkStraightToTarget(WorldPosition target)
 {
-    _BuildPacket(MSG_MOVE_HEARTBEAT);
+    targetPosition = target;
+    if (distToTarget() < 0.1) {
+        MoveStop();
+        return;
+    }
+    walkingToTarget = true;
+    facePoint(target);
+    MoveStartForward();
 }
 
-void MovementMgr::enableHeartbeat()
+void MovementMgr::facePoint(WorldPosition point)
 {
-    heartbeatEnabled = true;
+    WorldPosition currentPos = _mychar->GetPosition();
+    const float diffx = point.x - currentPos.x;
+    const float diffy = point.y - currentPos.y;
+    float theta = atan2(diffy, diffx);
+    theta = theta < 0 ? theta + 2*M_PI : theta;
+    currentPos.o = theta;
+    _mychar->SetPosition(currentPos);
+    MoveSetFacing();
 }
 
-void MovementMgr::disableHeartbeat()
+float MovementMgr::distToTarget()
 {
-    heartbeatEnabled = false;
+    const WorldPosition &cp = _mychar->GetPosition();
+    return sqrt(pow(cp.x - targetPosition.x, 2) + \
+                pow(cp.y - targetPosition.y, 2) + \
+                pow(cp.z - targetPosition.z, 2));
 }
 

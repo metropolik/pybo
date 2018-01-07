@@ -276,7 +276,7 @@ void PseuInstanceConf::ApplyFromVarSet(void)
     }
 
     // cleanups, internal settings, etc.
-    log_setloglevel(1);
+    //log_setloglevel(1);
     log_setlogtime(false);
 }
 

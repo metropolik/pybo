@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "MovementInfo.h"
+#include "World.h"
 
 #define MOVE_HEARTBEAT_DELAY 500
 #define MOVE_TURN_UPDATE_DIFF 0.15f // not sure about original/real value, but this seems good
@@ -58,10 +59,11 @@ public:
     bool IsTurning(void); // spinning around?
     bool IsWalking(void); // walking straight forward/backward?
     bool IsStrafing(void); // strafing left/right?
-    void forceHeartbeat(void);
-    void enableHeartbeat();
-    void disableHeartbeat();
+    inline bool isWalkingToTarget() { return walkingToTarget; }
+    void walkStraightToTarget(WorldPosition target);
+    void facePoint(WorldPosition point);
     inline void SetFallTime(uint32 falltime){_falltime = falltime; }
+    float distToTarget();
 
 
 private:
@@ -69,7 +71,7 @@ private:
     PseuInstance *_instance;
     MyCharacter *_mychar;
     uint32 _moveFlags; // server relevant flags (move forward/backward/swim/fly/jump/etc)
-    uint32 _updatetime; // timeMS of last update cycle
+    uint32 lastUpdateTime; // timeMS of last update cycle
     uint32 _optime; // timeMS when last opcode was sent
     uint8 _movemode; // automatic or manual
     float _jumptime;
@@ -77,6 +79,9 @@ private:
     UnitMoveType _movetype; // index used for speed selection
     bool _moved;
     bool heartbeatEnabled;
+    bool walkingToTarget;
+    bool hasReachedTarget();
+    WorldPosition targetPosition;
 
 
 };
