@@ -11,6 +11,7 @@ MovementMgr::MovementMgr()
     _instance = NULL;
     _optime = 0;
     _updatetime = 0;
+    heartbeatEnabled = true;
     _moved = false;
 }
 
@@ -21,7 +22,8 @@ MovementMgr::~MovementMgr()
 
 void MovementMgr::SetInstance(PseuInstance *inst)
 {
-    _movemode = MOVEMODE_AUTO;
+    _movemode = MOVEMODE_MANUAL;
+    //_movemode = MOVEMODE_AUTO;
     _instance = inst;
     _mychar = inst->GetWSession()->GetMyChar();
     if(!_mychar)
@@ -65,9 +67,9 @@ void MovementMgr::Update(bool sendDirect)
     _updatetime = curtime;
 
     WorldPosition pos = _mychar->GetPosition();
-    float turnspeed = _mychar->GetSpeed(MOVE_TURN) / 1000.0f * timediff;
-    float runspeed = _mychar->GetSpeed(MOVE_RUN) / 1000.0f * timediff;
-    _movespeed = runspeed; // or use walkspeed, depending on setting. for now use only runspeed
+    float turnspeed = _mychar->GetSpeed(MOVE_TURN) / 1000.0f * timediff;    
+    float totalDistance = _mychar->GetSpeed(MOVE_RUN) / 1000.0f * timediff;
+    // or use walkspeed, depending on setting. for now use only runspeed
     // TODO: calc other speeds as soon as implemented
 /*
     if(_movemode == MOVEMODE_MANUAL)
@@ -95,8 +97,8 @@ void MovementMgr::Update(bool sendDirect)
             {
 
                 WorldPosition oldpos = pos;
-                pos.x += _movespeed * sin(pos.o + (M_PI/2));
-                pos.y -= _movespeed * cos(pos.o + (M_PI/2));
+                pos.x += totalDistance * sin(pos.o + (M_PI/2));
+                pos.y -= totalDistance * cos(pos.o + (M_PI/2));
                 if (_instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y) > 5.0f + pos.z)
                 {
                     pos = oldpos;
@@ -106,38 +108,20 @@ void MovementMgr::Update(bool sendDirect)
             {
 
                 WorldPosition oldpos = pos;
-                pos.x -= _movespeed * sin(pos.o + (M_PI/2));
-                pos.y += _movespeed * cos(pos.o + (M_PI/2));
+                pos.x -= totalDistance * sin(pos.o + (M_PI/2));
+                pos.y += totalDistance * cos(pos.o + (M_PI/2));
                 if (_instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y) > 5.0f + pos.z)
                 {
                     pos = oldpos;
                 }
             }
-        }
-        // ...
-//        if(_moveFlags & MOVEMENTFLAG_LEFT)
-//        {
-//            pos.o += turnspeed;
-//        }
-//        if(_moveFlags & MOVEMENTFLAG_RIGHT)
-//        {
-//            pos.o -= turnspeed;
-//        }
-//        if(pos.o < 0)
-//            pos.o += float(2 * M_PI);
-//        else if(pos.o > 2 * M_PI)
-//            pos.o -= float(2 * M_PI);
-//        //pos.z = _instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y);
-
-        if(_movemode == MOVEMODE_AUTO)
-        {
             _mychar->SetPosition(pos);
-        }
+        }        
 //    }
 
     // if we are moving, and 500ms have passed, send an heartbeat packet. just in case 500ms have passed but the packet is sent by another function, do not send here
     //if( !sendDirect && (_moveFlags & MOVEMENTFLAG_ANY_MOVE_NOT_TURNING) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime())
-    if( !sendDirect && (_moveFlags > 0) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime())
+    if(heartbeatEnabled && !sendDirect && (_moveFlags > 0) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime()) //HEARTBEAT
     {
         _BuildPacket(MSG_MOVE_HEARTBEAT);
 
@@ -279,5 +263,20 @@ bool MovementMgr::IsWalking(void)
 bool MovementMgr::IsStrafing(void)
 {
     return _moveFlags & (MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT);
+}
+
+void MovementMgr::forceHeartbeat()
+{
+    _BuildPacket(MSG_MOVE_HEARTBEAT);
+}
+
+void MovementMgr::enableHeartbeat()
+{
+    heartbeatEnabled = true;
+}
+
+void MovementMgr::disableHeartbeat()
+{
+    heartbeatEnabled = false;
 }
 

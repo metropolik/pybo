@@ -58,6 +58,9 @@ public:
     bool IsTurning(void); // spinning around?
     bool IsWalking(void); // walking straight forward/backward?
     bool IsStrafing(void); // strafing left/right?
+    void forceHeartbeat(void);
+    void enableHeartbeat();
+    void disableHeartbeat();
     inline void SetFallTime(uint32 falltime){_falltime = falltime; }
 
 
@@ -69,11 +72,11 @@ private:
     uint32 _updatetime; // timeMS of last update cycle
     uint32 _optime; // timeMS when last opcode was sent
     uint8 _movemode; // automatic or manual
-    float _movespeed; // current xy movement speed
     float _jumptime;
     uint32 _falltime;
     UnitMoveType _movetype; // index used for speed selection
     bool _moved;
+    bool heartbeatEnabled;
 
 
 };

@@ -202,7 +202,6 @@ bool PseuInstance::ConnectToRealm(void)
 PseuInstanceConf::PseuInstanceConf()
 {
     exitonerror=false;
-    debug=0;
 }
 
 void PseuInstanceConf::ApplyFromVarSet(void)
@@ -277,8 +276,8 @@ void PseuInstanceConf::ApplyFromVarSet(void)
     }
 
     // cleanups, internal settings, etc.
-    log_setloglevel(debug);
-    log_setlogtime(true);
+    log_setloglevel(1);
+    log_setlogtime(false);
 }
 
 
@@ -286,7 +285,6 @@ void PseuInstanceConf::ApplyFromVarSet(void)
 
 PseuInstanceConf::~PseuInstanceConf()
 {
-        //...
 }
 
 

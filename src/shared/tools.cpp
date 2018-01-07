@@ -204,11 +204,13 @@ uint32 getMSTime(void)
     uint32 time_in_ms = 0;
 #if PLATFORM == PLATFORM_WIN32
     time_in_ms = timeGetTime();
+    //TODO: change like in linux
 #else
     struct timeb tp;
     ftime(&tp);
 
-    time_in_ms = tp.time * 1000 + tp.millitm;
+    time_in_ms = (tp.time - processStartTimeSeconds) * 1000 + \
+            (tp.millitm - processStartTimeMilliSeconds);
 #endif
 
     return time_in_ms;
@@ -341,4 +343,10 @@ std::string GetAbsolutePath(const char *filename)
 #endif
 
     return p;
+}
+
+void setProcessStartTime(uint32 sec, uint32 ms)
+{
+    processStartTimeSeconds = sec;
+    processStartTimeMilliSeconds = ms;
 }

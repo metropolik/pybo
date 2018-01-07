@@ -8,9 +8,12 @@
 #define M_UNSETBIT(var,bit) ( (var)&=(~(1<<(bit))) )
 #define M_HASBIT(var,bit) ( (var)&(1<<(bit)) )
 
+static uint32 processStartTimeSeconds = 0;
+static uint32 processStartTimeMilliSeconds = 0;
 
 void printchex(std::string,bool);
 void printchex(char *in, uint32 len, bool);
+void setProcessStartTime(uint32 sec, uint32 ms);
 std::string stringToUpper(std::string);
 std::string stringToLower(std::string);
 std::string toString(uint64);
