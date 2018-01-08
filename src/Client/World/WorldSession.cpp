@@ -1137,14 +1137,14 @@ void WorldSession::_HandleMovementOpcode(WorldPacket& recvPacket)
     {
         ((WorldObject*)obj)->SetPosition(mi.pos.x,mi.pos.y,mi.pos.z,mi.pos.o);
     }    
-    GetWorld()->GetMoveMgr()->walkStraightToTarget(mi.pos);
-    WorldPosition currentPosition = GetMyChar()->GetPosition();
-    currentPosition.z = mi.pos.z;
-    if (recvPacket.GetOpcode() == MSG_MOVE_STOP) {
-        currentPosition.x = mi.pos.x;
-        currentPosition.y = mi.pos.y;
-    }
-    GetMyChar()->SetPosition(currentPosition);
+    //GetWorld()->GetMoveMgr()->walkStraightToTarget(mi.pos);
+//    WorldPosition currentPosition = GetMyChar()->GetPosition();
+//    currentPosition.z = mi.pos.z;
+//    if (recvPacket.GetOpcode() == MSG_MOVE_STOP) {
+//        currentPosition.x = mi.pos.x;
+//        currentPosition.y = mi.pos.y;
+//    }
+//    GetMyChar()->SetPosition(currentPosition);
 
 }
 

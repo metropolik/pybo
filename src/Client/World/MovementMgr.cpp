@@ -98,7 +98,7 @@ void MovementMgr::Update(bool sendDirect)
             if(_moveFlags & MOVEMENTFLAG_FORWARD)
             {
 
-                WorldPosition oldpos = pos;
+                //WorldPosition oldpos = pos;
                 pos.x += totalDistance * sin(pos.o + (M_PI/2));
                 pos.y -= totalDistance * cos(pos.o + (M_PI/2));
 //                if (_instance->GetWSession()->GetWorld()->GetPosZ(pos.x,pos.y) > 5.0f + pos.z)
@@ -118,20 +118,10 @@ void MovementMgr::Update(bool sendDirect)
 //                }
             }
             _mychar->SetPosition(pos);
-            if (walkingToTarget && distToTarget() < 0.5) {
-                MoveStop();
-                walkingToTarget = false;
-                std::cout << "stoping" << std::endl;
-            }
-            static uint32 lastPrint = 0;
-            if (getMSTime() - lastPrint > 500) {
-                std::cout << distToTarget() << std::endl;
-                lastPrint = getMSTime();
-            }
-        }        
-//    }
+        }
 
-    // if we are moving, and 500ms have passed, send an heartbeat packet. just in case 500ms have passed but the packet is sent by another function, do not send here
+    // if we are moving, and 500ms have passed, send an heartbeat packet.
+        //just in case 500ms have passed but the packet is sent by another function, do not send here
     //if( !sendDirect && (_moveFlags & MOVEMENTFLAG_ANY_MOVE_NOT_TURNING) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime())
     if(heartbeatEnabled && !sendDirect && (_moveFlags > 0) && _optime + MOVE_HEARTBEAT_DELAY < getMSTime()) //HEARTBEAT
     {
@@ -145,6 +135,22 @@ void MovementMgr::Update(bool sendDirect)
         }
     }
     // TODO: apply gravity, handle falling, swimming, etc.
+    static bool firstTarget = true;
+    static WorldPosition first(-8358.f, 723.f, 59.45);
+    static WorldPosition nfirst(-8348.f, 723.f, 59.45);
+    if (!sendDirect) { //ignore update calls that came not from the world update cycle
+        if (firstTarget == true) {
+            walkStraightToTarget(first);
+            if (!walkingToTarget) {
+                firstTarget = false;
+            }
+        } else {
+            walkStraightToTarget(nfirst);
+            if (!walkingToTarget) {
+                firstTarget = true;
+            }
+        }
+    }
 }
 
 // stops
@@ -177,7 +183,8 @@ void MovementMgr::MoveStartBackward(void)
 {
     if(_moveFlags & MOVEMENTFLAG_BACKWARD)
         return;
-    _moveFlags |= (MOVEMENTFLAG_BACKWARD | MOVEMENTFLAG_WALK_MODE); // backward walk is always slow; flag must be set, otherwise causing weird movement in other client
+    _moveFlags |= (MOVEMENTFLAG_BACKWARD | MOVEMENTFLAG_WALK_MODE);
+    // backward walk is always slow; flag must be set, otherwise causing weird movement in other client
     _moveFlags &= ~MOVEMENTFLAG_FORWARD;
     Update(true);
     _BuildPacket(MSG_MOVE_START_BACKWARD);
@@ -278,27 +285,33 @@ bool MovementMgr::IsStrafing(void)
 }
 
 void MovementMgr::walkStraightToTarget(WorldPosition target)
-{
+{    
     targetPosition = target;
     if (distToTarget() < 0.1) {
         MoveStop();
+        walkingToTarget = false;
         return;
     }
     walkingToTarget = true;
     facePoint(target);
-    MoveStartForward();
+    if (!(_moveFlags & MOVEMENTFLAG_FORWARD)) {
+        MoveStartForward();
+    }
 }
 
 void MovementMgr::facePoint(WorldPosition point)
 {
     WorldPosition currentPos = _mychar->GetPosition();
     const float diffx = point.x - currentPos.x;
-    const float diffy = point.y - currentPos.y;
-    float theta = atan2(diffy, diffx);
-    theta = theta < 0 ? theta + 2*M_PI : theta;
+    const float diffy = point.y - currentPos.y;    
+    float theta = atan2(diffy, diffx);    
+    theta = theta < 0 ? theta + 2*M_PI : theta;    
+    if (_mychar->GetPosition().o == theta) {
+        return; //already facing that direction
+    }
     currentPos.o = theta;
-    _mychar->SetPosition(currentPos);
-    MoveSetFacing();
+    _mychar->SetPosition(currentPos);    
+    MoveSetFacing();    
 }
 
 float MovementMgr::distToTarget()

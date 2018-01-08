@@ -140,7 +140,7 @@ public:
     virtual ~WorldObject ( ) {}
     void SetPosition(float x, float y, float z, float o, uint16 _map);
     void SetPosition(float x, float y, float z, float o);
-    inline void SetPosition(WorldPosition& wp) { _wpos = wp; }
+    void SetPosition(WorldPosition& wp);
     inline void SetPosition(WorldPosition& wp, uint16 mapid) { SetPosition(wp); _m = mapid; }
     inline WorldPosition GetPosition(void) {return _wpos; }
     inline WorldPosition *GetPositionPtr(void) {return &_wpos; }

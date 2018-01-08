@@ -51,6 +51,11 @@ void WorldObject::SetPosition(float x, float y, float z, float o)
     _wpos.o = o;
 }
 
+void WorldObject::SetPosition(WorldPosition &wp)
+{
+     _wpos = wp;
+}
+
 void WorldObject::SetPosition(float x, float y, float z, float o, uint16 _map)
 {
     SetPosition(x,y,z,o);

@@ -18,8 +18,9 @@ if(BUILDING_IN_SOURCE)
   )
 endif()
 
-option(DEBUG "Debug mode" 0)
-option(BUILD_TOOLS "Build Tools" 0)
+#option(DEBUG "Debug mode" 1)
+#option(BUILD_TOOLS "Build Tools" 0)
+set(DEBUG 1)
 
 
 find_package(Platform REQUIRED)
